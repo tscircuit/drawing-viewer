@@ -1,15 +1,14 @@
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
-import { DrawingExample } from "../pages/components/DrawingExample"
-import PcbDimensions from "../pages/fixtures/pcb-dimensions"
+import DrawingDimensions from "../pages/drawing-dimensions.page"
 
 const root = document.getElementById("root")
 if (!root) throw new Error("Missing root element")
 
 createRoot(root).render(
   <StrictMode>
-    <DrawingExample containerStyle={{ height: "100vh" }}>
-      <PcbDimensions />
-    </DrawingExample>
+    <div style={{ height: "100vh" }}>
+      <DrawingDimensions />
+    </div>
   </StrictMode>,
 )
