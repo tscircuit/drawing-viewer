@@ -2,9 +2,9 @@
 
 React viewer for engineering drawings in Circuit JSON.
 
-The Cosmos example renders PCB hole spacing and board dimensions from the
-[assembly drawing dimension docs](https://docs.tscircuit.com/elements/assembly-drawing-dimension),
-using JSX compiled by core.
+The Cosmos example adapts the [carrier inspection sheet from the drawing docs](https://docs.tscircuit.com/elements/assembly-drawing-page)
+with plan and isometric views, dimension annotations, and a title block, using JSX
+compiled by core.
 
 ## Development
 
@@ -13,7 +13,7 @@ bun install
 bun run start
 ```
 
-Open the Cosmos URL printed in the terminal and select **drawing-dimensions**.
+Open the Cosmos URL printed in the terminal and select **engineering-drawing**.
 
 ```sh
 bun test

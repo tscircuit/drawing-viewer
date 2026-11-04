@@ -1,6 +1,6 @@
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
-import DrawingDimensions from "../pages/drawing-dimensions.page"
+import EngineeringDrawingPage from "../pages/engineering-drawing.page"
 
 const root = document.getElementById("root")
 if (!root) throw new Error("Missing root element")
@@ -8,7 +8,7 @@ if (!root) throw new Error("Missing root element")
 createRoot(root).render(
   <StrictMode>
     <div style={{ height: "100vh" }}>
-      <DrawingDimensions />
+      <EngineeringDrawingPage />
     </div>
   </StrictMode>,
 )
