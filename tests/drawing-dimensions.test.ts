@@ -2,12 +2,12 @@ import { expect, test } from "bun:test"
 import { Buffer } from "node:buffer"
 import { decode } from "fast-png"
 import type { CircuitJson } from "circuit-json"
+import { createElement } from "react"
 import { applyToPoint, compose, scale, translate } from "transformation-matrix"
 import { renderDrawingPages } from "../lib/utils/render-drawing-pages"
-import {
-  cadDimensionsCircuit,
-  pcbDimensionsCircuit,
-} from "../pages/fixtures/dimension-examples"
+import CadDimensions from "../pages/fixtures/cad-dimensions"
+import PcbDimensions from "../pages/fixtures/pcb-dimensions"
+import { renderToCircuitJson } from "../pages/utils/render-to-circuit-json"
 
 const countDarkPixelsNear = ({
   png,
@@ -100,7 +100,7 @@ const assertDocumentationDrawing = async ({
 
 test("the PCB docs example renders all dimensions at their measured hole positions", async () => {
   await assertDocumentationDrawing({
-    circuitJson: pcbDimensionsCircuit,
+    circuitJson: await renderToCircuitJson(createElement(PcbDimensions)),
     expectedLabels: ["30 mm", "14 mm", "8 mm", "50 mm"],
     title: "PCB HOLE SPACING AND EDGE OFFSET",
   })
@@ -108,7 +108,7 @@ test("the PCB docs example renders all dimensions at their measured hole positio
 
 test("the named CAD outline docs example renders native geometry and bore dimensions", async () => {
   await assertDocumentationDrawing({
-    circuitJson: cadDimensionsCircuit,
+    circuitJson: await renderToCircuitJson(createElement(CadDimensions)),
     expectedLabels: ["3 mm", "30 mm", "8 mm", "7 mm"],
     title: "NAMED CAD HOLES AND OUTLINE",
   })

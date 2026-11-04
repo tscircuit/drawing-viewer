@@ -1,14 +1,16 @@
-import { DrawingViewer } from "lib/components/DrawingViewer"
-import {
-  cadDimensionsCircuit,
-  pcbDimensionsCircuit,
-} from "./fixtures/dimension-examples"
+import { DrawingExample } from "./components/DrawingExample"
+import CadDimensions from "./fixtures/cad-dimensions"
+import PcbDimensions from "./fixtures/pcb-dimensions"
 
 export default {
   "PCB holes and board edges": () => (
-    <DrawingViewer circuitJson={pcbDimensionsCircuit} />
+    <DrawingExample>
+      <PcbDimensions />
+    </DrawingExample>
   ),
   "Named CAD holes and outlines": () => (
-    <DrawingViewer circuitJson={cadDimensionsCircuit} />
+    <DrawingExample>
+      <CadDimensions />
+    </DrawingExample>
   ),
 }

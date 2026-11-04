@@ -65,13 +65,18 @@ within one render.
 
 ### Documentation fixtures
 
-`pages/fixtures/dimensions-{pcb,cad}.circuit.json` are the compiled Circuit JSON
-inputs used by the docs, generated with `@tscircuit/core` 0.0.2209. The original TSX
-examples are retained in `pages/fixtures/dimensions-code.ts` for reference. Their
-dimension endpoints and labels are core output, not values measured by this
-viewer. See the upstream
-[fixture generator](https://github.com/tscircuit/docs/blob/main/scripts/generate-dimension-previews.ts)
-to regenerate the inputs after changing the authoring examples.
+`pages/fixtures/pcb-dimensions.tsx` and `cad-dimensions.tsx` contain the docs'
+authoring examples as JSX. The development-only `DrawingExample` wrapper compiles
+them with `@tscircuit/core`, awaits `renderUntilSettled()` for CAD geometry and
+resolved dimensions, and passes the resulting Circuit JSON to `DrawingViewer`.
+No generated JSON fixtures or duplicate source strings need to be maintained.
+The dimension endpoints and labels are core output, not values measured by this
+viewer. This follows the upstream
+[preview generator](https://github.com/tscircuit/docs/blob/main/scripts/generate-dimension-previews.ts).
+The compiler and JSCAD authoring dependencies are development dependencies; the
+published `lib/` entrypoint only consumes Circuit JSON.
+Compiler support modules are listed explicitly in `devDependencies` because the
+published core bundle imports some packages absent from its dependency manifest.
 
 Bun lockfiles are disabled in `bunfig.toml` and ignored by Git. CI checks types,
 tests, and formatting. The release workflow publishes the source package to
