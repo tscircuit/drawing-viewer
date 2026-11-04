@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server"
 test("the public source entrypoint renders without browser globals and accepts host sizing", () => {
   const html = renderToStaticMarkup(
     <DrawingViewer
+      circuitJson={[]}
       className="embedded-drawing-viewer"
       containerStyle={{ width: 320, height: 200 }}
     />,
