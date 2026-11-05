@@ -14,6 +14,7 @@ bun run start
 ```
 
 Open the Cosmos URL printed in the terminal and select **engineering-drawing**.
+Scroll or pinch to zoom, drag to pan, and use **Fit** to show the complete drawing.
 
 ```sh
 bun test
