@@ -43,16 +43,23 @@ const selectDrawingGeometry = (
     view.source_group_id ? [view.source_group_id] : [],
   )
   const groups = circuitJson.filter((e) => e.type === "source_group")
+  const boardSubcircuitIds = new Set<string>()
   // Expand descendants regardless of document order, including nested assemblies.
   let previousSize = -1
-  while (previousSize !== groupIds.size) {
-    previousSize = groupIds.size
+  while (previousSize !== groupIds.size + boardSubcircuitIds.size) {
+    previousSize = groupIds.size + boardSubcircuitIds.size
     for (const group of groups) {
       if (
-        group.parent_source_group_id &&
-        groupIds.has(group.parent_source_group_id)
+        groupIds.has(group.source_group_id) ||
+        (group.parent_source_group_id &&
+          groupIds.has(group.parent_source_group_id)) ||
+        (group.parent_subcircuit_id &&
+          boardSubcircuitIds.has(group.parent_subcircuit_id))
       ) {
         groupIds.add(group.source_group_id)
+        if (group.is_subcircuit && group.subcircuit_id) {
+          boardSubcircuitIds.add(group.subcircuit_id)
+        }
       }
     }
   }
@@ -68,14 +75,6 @@ const selectDrawingGeometry = (
       componentIds.add(element.source_component_id)
     }
   }
-  const boardSubcircuitIds = new Set(
-    groups
-      .filter(
-        (group) => groupIds.has(group.source_group_id) && group.is_subcircuit,
-      )
-      .map((group) => group.subcircuit_id)
-      .filter((id): id is string => Boolean(id)),
-  )
   const boardIds = new Set<string>()
   const pcbComponentIds = new Set<string>()
   const pcbGroupIds = new Set<string>()

@@ -105,11 +105,10 @@ export const DrawingViewer = ({
 
 const DrawingViewport = ({ children }: { children: ReactNode }) => {
   const pagesRef = useRef<HTMLDivElement>(null)
-  const {
-    ref: viewportRef,
-    transform,
-    setTransform,
-  } = useMouseMatrixTransform({ shouldDrag: shouldDragDrawing })
+  const viewportControls = useMouseMatrixTransform({
+    shouldDrag: shouldDragDrawing,
+  })
+  const { ref: viewportRef, transform, setTransform } = viewportControls
 
   const fitDrawing = useCallback(() => {
     const viewport: HTMLDivElement | null = viewportRef.current
@@ -143,22 +142,6 @@ const DrawingViewport = ({ children }: { children: ReactNode }) => {
     if (pagesRef.current) observer.observe(pagesRef.current)
     return () => observer.disconnect()
   }, [fitDrawing, viewportRef])
-
-  const zoom = (factor: number) => {
-    const viewport: HTMLDivElement | null = viewportRef.current
-    if (!viewport) return
-    setTransform(
-      compose(
-        scale(
-          factor,
-          factor,
-          viewport.clientWidth / 2,
-          viewport.clientHeight / 2,
-        ),
-        transform,
-      ),
-    )
-  }
 
   return (
     <>
@@ -208,7 +191,7 @@ const DrawingViewport = ({ children }: { children: ReactNode }) => {
           type="button"
           aria-label="Zoom out"
           title="Zoom out"
-          onClick={() => zoom(1 / 1.2)}
+          onClick={() => zoom(1 / 1.2, viewportControls)}
           style={zoomButtonStyle}
         >
           −
@@ -226,13 +209,32 @@ const DrawingViewport = ({ children }: { children: ReactNode }) => {
           type="button"
           aria-label="Zoom in"
           title="Zoom in"
-          onClick={() => zoom(1.2)}
+          onClick={() => zoom(1.2, viewportControls)}
           style={zoomButtonStyle}
         >
           +
         </button>
       </div>
     </>
+  )
+}
+
+const zoom = (
+  factor: number,
+  { ref, transform, setTransform }: ReturnType<typeof useMouseMatrixTransform>,
+) => {
+  const viewport: HTMLDivElement | null = ref.current
+  if (!viewport) return
+  setTransform(
+    compose(
+      scale(
+        factor,
+        factor,
+        viewport.clientWidth / 2,
+        viewport.clientHeight / 2,
+      ),
+      transform,
+    ),
   )
 }
 
