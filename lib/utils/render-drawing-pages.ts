@@ -76,27 +76,58 @@ const selectDrawingGeometry = (
       .map((group) => group.subcircuit_id)
       .filter((id): id is string => Boolean(id)),
   )
+  const boardIds = new Set<string>()
+  const pcbComponentIds = new Set<string>()
+  const pcbGroupIds = new Set<string>()
+  for (const element of circuitJson) {
+    if (
+      element.type === "pcb_board" &&
+      element.subcircuit_id &&
+      boardSubcircuitIds.has(element.subcircuit_id)
+    ) {
+      boardIds.add(element.pcb_board_id)
+    }
+    if (
+      element.type === "pcb_component" &&
+      componentIds.has(element.source_component_id)
+    ) {
+      pcbComponentIds.add(element.pcb_component_id)
+    }
+    if (element.type === "pcb_group" && groupIds.has(element.source_group_id)) {
+      pcbGroupIds.add(element.pcb_group_id)
+    }
+  }
 
-  // Keep placement and model context; filter the records that create geometry.
+  // Keep placement and model context; require ownership for scoped PCB geometry.
   return circuitJson.filter((element) => {
     switch (element.type) {
       case "cad_component":
       case "pcb_component":
         return componentIds.has(element.source_component_id)
       case "pcb_board":
-        return Boolean(
-          element.subcircuit_id &&
-            boardSubcircuitIds.has(element.subcircuit_id),
-        )
+        return boardIds.has(element.pcb_board_id)
       case "pcb_panel":
         return false
+      case "pcb_group":
+        return true
       case "cad_cable":
         return (
           componentIds.has(element.from_source_component_id) &&
           componentIds.has(element.to_source_component_id)
         )
       default:
-        return true
+        if (!element.type.startsWith("pcb_")) return true
+        // Prefer the most specific owner; a foreign component cannot fall back
+        // to a selected board or subcircuit shared by its siblings.
+        if ("pcb_component_id" in element && element.pcb_component_id)
+          return pcbComponentIds.has(element.pcb_component_id)
+        if ("pcb_board_id" in element && element.pcb_board_id)
+          return boardIds.has(element.pcb_board_id)
+        if ("pcb_group_id" in element && element.pcb_group_id)
+          return pcbGroupIds.has(element.pcb_group_id)
+        if ("subcircuit_id" in element && element.subcircuit_id)
+          return boardSubcircuitIds.has(element.subcircuit_id)
+        return false
     }
   })
 }
