@@ -30,17 +30,19 @@ jobs:
         with:
           bun-version: latest
 
-      - uses: actions/setup-node@v4
+      - run: bun install
+      - run: bun run typecheck
+      - run: bun run format:check
+      - run: bun test
+
+      - name: Configure GitHub Packages for publishing
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://npm.pkg.github.com
           scope: "@tscircuit"
 
       - run: npm install -g pver
-      - run: bun install
-      - run: bun run typecheck
-      - run: bun run format:check
-      - run: bun test
 
       - name: Publish package
         run: pver release --no-push-main
