@@ -67,26 +67,42 @@ test("the public source entrypoint renders without browser globals and accepts h
   expect(html).toContain("width:320px;height:200px")
 })
 
-test("renders the carrier inspection sheet with plan, isometric, and dimension annotations", async () => {
-  const circuit = new RootCircuit()
-  circuit.add(<CarrierBoardInspection />)
-  await circuit.renderUntilSettled()
-  const pages = await renderDrawingPages(circuit.getCircuitJson())
+test.each([false, true])(
+  "renders the carrier inspection sheet with plan, isometric, and dimension annotations (include section: %s)",
+  async (includeSection) => {
+    const circuit = new RootCircuit()
+    circuit.add(<CarrierBoardInspection includeSection={includeSection} />)
+    await circuit.renderUntilSettled()
+    const circuitJson = circuit.getCircuitJson()
+    const pages = await renderDrawingPages(circuitJson)
+    const inspectionId = circuitJson
+      .filter((element) => element.type === "drawing_page")
+      .find((page) => page.name === "carrier-inspection")?.drawing_page_id
+    const inspection = pages.find(
+      (page) => page.drawingPageId === inspectionId,
+    )!
 
-  expect(pages).toHaveLength(1)
-  expect(pages[0].svg.match(/data:image\/png;base64,/g)).toHaveLength(2)
-  for (const label of [
-    "PLAN",
-    "ISOMETRIC",
-    "CONTROLLER CARRIER - INSPECTION",
-    "CTRL-CARRIER-001",
-    "80 mm",
-    "50 mm",
-    "70 mm",
-  ]) {
-    expect(pages[0].svg).toContain(label)
-  }
-})
+    expect(pages).toHaveLength(includeSection ? 2 : 1)
+    expect(inspection.svg.match(/data:image\/png;base64,/g)).toHaveLength(2)
+    for (const label of [
+      "PLAN",
+      "ISOMETRIC",
+      "CONTROLLER CARRIER - INSPECTION",
+      "CTRL-CARRIER-001",
+      "80 mm",
+      "50 mm",
+      "70 mm",
+    ]) {
+      expect(inspection.svg).toContain(label)
+    }
+    if (includeSection) {
+      const section = pages.find((page) => page.drawingPageId !== inspectionId)!
+      expect(section.svg).toContain("SECTION THROUGH H3 AND H4")
+      expect(section.svg).toContain("CTRL-CARRIER-002")
+      expect(section.svg).toContain("data:image/png;base64,")
+    }
+  },
+)
 
 test("isolates each board's holes, plated holes, and cutouts in a two-board drawing", async () => {
   for (const selectedBoard of ["A", "B"]) {

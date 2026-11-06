@@ -10,6 +10,7 @@ import {
 } from "react"
 import { compose, scale, toCSS, translate } from "transformation-matrix"
 import { useMouseMatrixTransform } from "use-mouse-matrix-transform"
+import { DrawingPageSelector } from "./DrawingPageSelector"
 
 export interface DrawingViewerProps {
   circuitJson: CircuitJson
@@ -22,6 +23,7 @@ export const DrawingViewer = ({
   containerStyle,
   className,
 }: DrawingViewerProps) => {
+  const [selectedPageId, setSelectedPageId] = useState<string>()
   const [result, setResult] = useState<{
     circuitJson: CircuitJson
     pages?: DrawingPageOutput[]
@@ -55,20 +57,30 @@ export const DrawingViewer = ({
   const drawingPages = circuitJson.filter(
     (element) => element.type === "drawing_page",
   )
+  const selectedPage =
+    drawingPages.find((page) => page.drawing_page_id === selectedPageId) ??
+    drawingPages[0]
+  const activePageId = selectedPage?.drawing_page_id
+  const renderedPage = currentResult?.pages?.find(
+    (page) => page.drawingPageId === activePageId,
+  )
+
+  useEffect(() => {
+    setSelectedPageId(activePageId)
+  }, [activePageId])
 
   let content: ReactNode
   if (currentResult?.error !== undefined) {
     content = <p role="alert">{currentResult.error}</p>
   } else if (!drawingPages.length) {
     content = <p role="status">No engineering drawings in this circuit.</p>
-  } else if (!currentResult?.pages) {
+  } else if (!renderedPage) {
     content = <p role="status">Rendering engineering drawings…</p>
   } else {
-    content = currentResult.pages.map((page) => (
+    content = (
       <img
-        key={page.drawingPageId}
-        alt={`Engineering drawing: ${drawingPages.find((record) => record.drawing_page_id === page.drawingPageId)?.name ?? page.drawingPageId}`}
-        src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(page.svg)}`}
+        alt={`Engineering drawing: ${selectedPage?.display_name ?? selectedPage?.name ?? activePageId}`}
+        src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(renderedPage.svg)}`}
         style={{
           display: "block",
           width: "100%",
@@ -77,7 +89,7 @@ export const DrawingViewer = ({
         }}
         draggable={false}
       />
-    ))
+    )
   }
 
   return (
@@ -94,11 +106,16 @@ export const DrawingViewer = ({
         ...containerStyle,
       }}
     >
-      {currentResult?.pages?.length ? (
-        <DrawingViewport>{content}</DrawingViewport>
+      {renderedPage ? (
+        <DrawingViewport key={activePageId}>{content}</DrawingViewport>
       ) : (
         content
       )}
+      <DrawingPageSelector
+        pages={drawingPages}
+        selectedPageId={activePageId}
+        onSelectPage={setSelectedPageId}
+      />
     </div>
   )
 }
