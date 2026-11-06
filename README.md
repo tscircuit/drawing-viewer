@@ -2,8 +2,9 @@
 
 React viewer for engineering drawings in Circuit JSON.
 
-This initial scaffold provides a `DrawingViewer` component and a Hello world
-Cosmos page. Drawing rendering and Circuit JSON inputs will be added separately.
+The Cosmos example adapts the [carrier inspection sheet from the drawing docs](https://docs.tscircuit.com/elements/assembly-drawing-page)
+with plan and isometric views, dimension annotations, and a title block, using JSX
+compiled by core.
 
 ## Development
 
@@ -12,7 +13,8 @@ bun install
 bun run start
 ```
 
-Open the Cosmos URL printed in the terminal and select **hello-world**.
+Open the Cosmos URL printed in the terminal and select **engineering-drawing**.
+Scroll or pinch to zoom, drag to pan, and use **Fit** to show the complete drawing.
 
 ```sh
 bun test
@@ -32,7 +34,10 @@ dependency.
 import { DrawingViewer } from "@tscircuit/drawing-viewer"
 
 export default () => (
-  <DrawingViewer containerStyle={{ width: "100%", height: 400 }} />
+  <DrawingViewer
+    circuitJson={circuitJsonWithDrawingPages}
+    containerStyle={{ width: "100%", height: 400 }}
+  />
 )
 ```
 
