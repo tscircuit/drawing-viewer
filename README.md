@@ -15,6 +15,8 @@ bun run start
 
 Open the Cosmos URL printed in the terminal and select **engineering-drawing**.
 Scroll or pinch to zoom, drag to pan, and use **Fit** to show the complete drawing.
+Select **multiple-drawings** for the inspection and section sheets from the docs.
+Use the **Drawing** dropdown to switch pages; each selected page fits the viewport.
 
 ```sh
 bun test
@@ -29,6 +31,11 @@ The package follows the handbook's preferred source-only installation: its publi
 entrypoint is `lib/index.ts`, and only `lib/` is packaged. Consumers need a
 TypeScript/TSX-aware runtime or bundler, such as Bun or Vite. React is a peer
 dependency.
+
+Circuits with multiple `drawing_page` records show one page at a time, starting
+with the first page in document order. The drawing selector uses `display_name`,
+then `name`, then the page ID as its label, and appears when there is more than
+one page.
 
 ```tsx
 import { DrawingViewer } from "@tscircuit/drawing-viewer"
