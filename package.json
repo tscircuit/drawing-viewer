@@ -1,6 +1,6 @@
 {
   "name": "@tscircuit/drawing-viewer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "React viewer for engineering drawings in Circuit JSON",
   "type": "module",
   "module": "lib/index.ts",
