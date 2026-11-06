@@ -6,14 +6,20 @@ import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { DrawingViewer } from "../lib/components/DrawingViewer"
 
-const render = async (
-  root: Root,
-  container: HTMLElement,
-  json: CircuitJson,
-) => {
-  await act(async () => root.render(<DrawingViewer circuitJson={json} />))
+const render = async ({
+  root,
+  container,
+  circuitJson,
+}: {
+  root: Root
+  container: HTMLElement
+  circuitJson: CircuitJson
+}) => {
+  await act(async () =>
+    root.render(<DrawingViewer circuitJson={circuitJson} />),
+  )
   const deadline = Date.now() + 5000
-  while (container.querySelector('[role="status"]') && json.length) {
+  while (container.querySelector('[role="status"]') && circuitJson.length) {
     if (Date.now() > deadline) throw new Error("Drawing rendering timed out")
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 20))
@@ -22,11 +28,15 @@ const render = async (
   expect(container.querySelector('[role="alert"]')).toBeNull()
 }
 
-const selectPage = async (
-  container: HTMLElement,
-  dom: JSDOM,
-  pageId: string,
-) => {
+const selectPage = async ({
+  container,
+  dom,
+  pageId,
+}: {
+  container: HTMLElement
+  dom: JSDOM
+  pageId: string
+}) => {
   const select = container.querySelector("select")!
   await act(async () => {
     select.value = pageId
@@ -103,7 +113,7 @@ test("switches drawings, refits the viewport, and keeps selection valid as pages
   const root = createRoot(container)
 
   try {
-    await render(root, container, circuitJson)
+    await render({ root, container, circuitJson })
     expect(container.querySelectorAll("img")).toHaveLength(1)
     expect(container.querySelector("img")?.alt).toBe(
       "Engineering drawing: Carrier overview",
@@ -123,18 +133,18 @@ test("switches drawings, refits the viewport, and keeps selection valid as pages
     })
     expect(transform(container)).not.toBe(fittedTransform)
 
-    await selectPage(container, dom, pages[1].drawing_page_id)
+    await selectPage({ container, dom, pageId: pages[1].drawing_page_id })
     expect(container.querySelectorAll("img")).toHaveLength(1)
     expect(container.querySelector("img")?.alt).toBe(
       "Engineering drawing: section",
     )
     expect(transform(container)).toBe(fittedTransform)
 
-    await render(root, container, [...circuitJson])
+    await render({ root, container, circuitJson: [...circuitJson] })
     expect(container.querySelector("select")?.value).toBe(
       pages[1].drawing_page_id,
     )
-    await selectPage(container, dom, pages[2].drawing_page_id)
+    await selectPage({ container, dom, pageId: pages[2].drawing_page_id })
     expect(container.querySelector("img")?.alt).toBe(
       `Engineering drawing: ${pages[2].drawing_page_id}`,
     )
@@ -144,18 +154,18 @@ test("switches drawings, refits the viewport, and keeps selection valid as pages
         !("drawing_page_id" in element) ||
         element.drawing_page_id === pages[0].drawing_page_id,
     )
-    await render(root, container, firstPageOnly)
+    await render({ root, container, circuitJson: firstPageOnly })
     expect(container.querySelector("select")).toBeNull()
     expect(container.querySelectorAll("img")).toHaveLength(1)
     expect(container.querySelector("img")?.alt).toBe(
       "Engineering drawing: Carrier overview",
     )
 
-    await render(root, container, circuitJson)
+    await render({ root, container, circuitJson })
     expect(container.querySelector("select")?.value).toBe(
       pages[0].drawing_page_id,
     )
-    await render(root, container, [])
+    await render({ root, container, circuitJson: [] })
     expect(container.querySelector("select")).toBeNull()
     expect(container.querySelector("img")).toBeNull()
     expect(container.textContent).toContain("No engineering drawings")
