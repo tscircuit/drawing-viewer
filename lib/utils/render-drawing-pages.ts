@@ -5,9 +5,14 @@ import {
   convertSceneToGLTF,
 } from "circuit-json-to-gltf"
 import { bufferFromDataURI, createSceneFromGLTF } from "poppygl"
+import type { RenderDrawingPagesOptions } from "../render-drawing-pages"
 
-export const renderDrawingPages = (circuitJson: CircuitJson) =>
+export const renderDrawingPages = (
+  circuitJson: CircuitJson,
+  options: RenderDrawingPagesOptions = {},
+) =>
   convertCircuitJsonToDrawingPages(circuitJson, {
+    drawingPageId: options.drawingPageId,
     resolveScene: async (view) => {
       const selected = selectDrawingGeometry(circuitJson, view)
       const board = selected.find((element) => element.type === "pcb_board")

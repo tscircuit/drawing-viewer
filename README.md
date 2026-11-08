@@ -53,6 +53,21 @@ tests, and formatting. The release workflow publishes the source package to
 GitHub Packages using the standard tscircuit plop template; no library build
 step is needed. `build:site` exports only the Cosmos demo site.
 
+## Rendering SVGs for downloads
+
+`renderDrawingPages` uses the same geometry selection and rendering as the viewer
+and loads the renderer when called. It returns every page in document order, or
+only the requested page when `drawingPageId` is supplied.
+
+```ts
+import { renderDrawingPages } from "@tscircuit/drawing-viewer"
+
+const pages = await renderDrawingPages(circuitJson, {
+  drawingPageId: selectedPage.drawing_page_id,
+})
+// Each page contains { drawingPageId, svg }.
+```
+
 ## References
 
 - [Repository bootstrapping guidelines](https://github.com/tscircuit/handbook/blob/main/guides/bootstrapping-repos.md)
