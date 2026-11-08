@@ -1,8 +1,7 @@
 import { expect, test } from "bun:test"
-import { DrawingViewer } from "@tscircuit/drawing-viewer"
+import { DrawingViewer, renderDrawingPages } from "@tscircuit/drawing-viewer"
 import { assembly, RootCircuit } from "@tscircuit/core"
 import { renderToStaticMarkup } from "react-dom/server"
-import { renderDrawingPages } from "../lib/utils/render-drawing-pages"
 import CarrierBoardInspection from "../pages/fixtures/carrier-board-inspection"
 
 const renderBoard = async (
@@ -113,6 +112,33 @@ test("isolates each board's holes, plated holes, and cutouts in a two-board draw
     expect(isolated[0].svg).toContain("data:image/png;base64,")
     expect(combined[0].svg).toBe(isolated[0].svg)
   }
+})
+
+test("the public renderer exports a selected drawing without rendering other pages", async () => {
+  const circuit = new RootCircuit()
+  circuit.add(<CarrierBoardInspection includeSection />)
+  await circuit.renderUntilSettled()
+  const circuitJson = circuit.getCircuitJson()
+  const section = circuitJson
+    .filter((element) => element.type === "drawing_page")
+    .find((page) => page.name === "carrier-section")!
+  // Unavailable geometry on another page must not block the selected sheet.
+  for (const element of circuitJson) {
+    if (
+      element.type !== "drawing_part_view" ||
+      element.drawing_page_id === section.drawing_page_id
+    )
+      continue
+    element.source_group_id = "unavailable-group"
+    element.source_component_ids = []
+  }
+  const pages = await renderDrawingPages(circuitJson, {
+    drawingPageId: section.drawing_page_id,
+  })
+  expect(pages).toHaveLength(1)
+  expect(pages[0].drawingPageId).toBe(section.drawing_page_id)
+  expect(pages[0].svg).toContain("SECTION THROUGH H3 AND H4")
+  expect(pages[0].svg).toContain("CTRL-CARRIER-002")
 })
 
 test.each(["subcircuit", "mixed"])(
