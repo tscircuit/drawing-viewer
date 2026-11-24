@@ -21,7 +21,7 @@ export const renderDrawingPages = (
       resolveAssemblySceneParts(circuitJson, resolveStaticAsset),
   })
 
-const selectDrawingGeometry = (
+export const selectDrawingGeometry = (
   circuitJson: CircuitJson,
   view: DrawingPartView,
 ): CircuitJson => {
@@ -96,7 +96,7 @@ const selectDrawingGeometry = (
       case "pcb_panel":
         return false
       case "pcb_group":
-        return true
+        return pcbGroupIds.has(element.pcb_group_id)
       case "cad_cable":
         return (
           componentIds.has(element.from_source_component_id) &&
